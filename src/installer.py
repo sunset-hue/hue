@@ -24,6 +24,8 @@ def _request_return_url(pkg: Package):
 def get_latest_ver(pkg: Package):
     downloadables: dict = _request_return_url(pkg)
     three_tuple: tuple[int, int, int] = (0, 0, 0)
+    success_data: int | None
+    n = 0
     curr_py_version = sys.version[
         0:2
     ]  # for example it would show us up to 3.13 if the current version was 3.13.5
@@ -37,7 +39,14 @@ def get_latest_ver(pkg: Package):
             # first few results here (if package name isn't alpha numeric is the version numbers we need)
             # since all pypi packages follow semver or some version of that, we can just put it into the 3 tuple, no extra formatting needed
             three_tuple = (to_be_turned[0], to_be_turned[1], to_be_turned[2])
+            success_data = n
+        n += 1
     if three_tuple == (0, 0, 0):
         print(
-            "Error! Could not find downloadable distribution that matches your current python version. Either you can downgrade or specify a version using ==, >=, <= syntax."
+            "Error! Could not find downloadable distribution that matches your current python version. Either you can downgrade a python version or specify a compatible package version using ==, >=, <= syntax."
         )
+        return
+    return downloadables[success_data]["url"]
+
+
+def install_into_site(): ...
