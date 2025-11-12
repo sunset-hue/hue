@@ -3,6 +3,8 @@
 import requests as r
 import json
 import zipfile as z
+import shutil
+import os
 
 
 def download(pkg: str):
@@ -13,10 +15,19 @@ def download(pkg: str):
         ).content
     )
     downloaded = r.get(links["files"][0]["url"])
-    print(links["files"][0])
-    with open(f"first_things_first.whl", "wb") as f:
+    with open(f"{pkg}.whl", "wb") as f:
         f.write(downloaded.content)
+    zipf = z.ZipFile(f"{pkg}.whl")
+    zipf.extractall(pkg)
+    try:
+        for i in os.listdir(f"{pkg}/{pkg}"):
+            shutil.move(f"{pkg}/{pkg}", f"site-packages/{pkg}")
+    except:
+        pass
+    os.removedirs(f"{pkg}")
+    os.remove(f"{pkg}.whl")
+
     # only get first one to download for now
 
 
-print(download("discmoji"))
+print(download("rich"))
