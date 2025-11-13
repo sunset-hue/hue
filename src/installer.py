@@ -37,8 +37,8 @@ def get_latest_ver(pkg: str) -> tuple[str, tuple] | None:
     three_tuple: tuple[int, int, int] = (0, 0, 0)
     success_data: int | None = None
     n = 0
-    formatted_sys_ver = sys.version if len(sys.version) == 6 else sys.version + ".0"
-    curr_py_version = sys.version[0 : _correct_idx_for_version()]
+    formatted_sys_ver = sys.version if len(sys.version) == 6 else sys.version + "".join(".0"*(6-len(sys.version)))
+    curr_py_version = formatted_sys_ver[0 : _correct_idx_for_version()]
     for i in downloadables:
         if (
             i.get("requires_python") == None
@@ -68,5 +68,5 @@ def get_latest_ver(pkg: str) -> tuple[str, tuple] | None:
     )  # pyright: ignore[reportReturnType]
 
 
-def install_into_site(pkg: str):
+def 
 
