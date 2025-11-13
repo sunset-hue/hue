@@ -21,21 +21,38 @@ def _request_return_url(pkg: Package):
     )["files"]
 
 
-def get_latest_ver(pkg: Package):
+def _correct_idx_for_version():
+    # returns the correct index for the type of version number we encounter
+    # really repetitive though, need a good way for it to look
+    if len(sys.version.split(".")) == 3 and int(sys.version.split(".")[1]) < 10:
+        return 4
+    if len(sys.version.split(".")) == 3 and int(sys.version.split(".")[1]) >= 10:
+        return 5
+    if len(sys.version.split(".")) == 2 and int(sys.version.split(".")[1]) < 10:
+        return 2
+    if len(sys.version.split(".")) == 2 and int(sys.version.split()[1]) >= 10:
+        return 3
+
+
+def get_latest_ver(pkg: Package) -> str | None:
+    """Gets the latest version of this package's download url if no version number was supplied.
+    Note that this only returns the latest version that supports the current python version that `hue`'s installed on.
+    """
     downloadables: dict = _request_return_url(pkg)
     three_tuple: tuple[int, int, int] = (0, 0, 0)
-    success_data: int | None
+    success_data: int | None = None
     n = 0
-    curr_py_version = sys.version[
-        0:2
-    ]  # for example it would show us up to 3.13 if the current version was 3.13.5
-    # for caching versions so we can tell which one's the newest
+    curr_py_version = sys.version[0 : _correct_idx_for_version()]
     for i in downloadables:
         if i["requires_python"] == None or int(
             "".join(curr_py_version.split("."))
         ) >= int("".join(i["requires_python"].strip("<=>").split("."))):
-            # here, my thought process is to just strip all the dots and turn the first 2 numbers into a integer, so we can compare those 2 values (this might cause a problem with packages that require more precision with versioning though, but we'll handle that later)
-            to_be_turned = i["filename"].strip("abcdefghijklmnopqrstuvwxyz").split(".")
+            to_be_turned = (
+                i["filename"]
+                .removesuffix(".tar.gz")
+                .strip("abcdefghijklmnopqrstuvwxyz")
+                .split(".")
+            )
             # first few results here (if package name isn't alpha numeric is the version numbers we need)
             # since all pypi packages follow semver or some version of that, we can just put it into the 3 tuple, no extra formatting needed
             three_tuple = (to_be_turned[0], to_be_turned[1], to_be_turned[2])
@@ -49,4 +66,6 @@ def get_latest_ver(pkg: Package):
     return downloadables[success_data]["url"]
 
 
-def install_into_site(): ...
+def install_into_site(pkg: Package):
+    # since we have no outside interface yet, this'll be enough
+    ...
