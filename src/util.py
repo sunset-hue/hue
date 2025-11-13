@@ -1,12 +1,12 @@
-"""File to manage basic installation needs"""
+"""File to manage basic utilities that hue needs."""
 
 import requests as r
 import json
 import sys
 
 
-
 def _request_return_url(pkg: str):
+    """Gets the download urls for a specific package."""
     return json.loads(
         r.request(
             "GET",
@@ -31,13 +31,17 @@ def _correct_idx_for_version():
 
 def get_latest_ver(pkg: str) -> tuple[str, tuple] | None:
     """Gets the latest version of this package's download url if no version number was supplied.
-    Note that this only returns the latest version that supports the current python version that `hue`'s installed on.
+    Note that this only returns the latest version that supports the current python version that the environment is on.
     """
     downloadables: dict = _request_return_url(pkg)
     three_tuple: tuple[int, int, int] = (0, 0, 0)
     success_data: int | None = None
     n = 0
-    formatted_sys_ver = sys.version if len(sys.version) == 6 else sys.version + "".join(".0"*(6-len(sys.version)))
+    formatted_sys_ver = (
+        sys.version
+        if len(sys.version) == 6
+        else sys.version + "".join(".0" * (6 - len(sys.version)))
+    )
     curr_py_version = formatted_sys_ver[0 : _correct_idx_for_version()]
     for i in downloadables:
         if (
@@ -68,5 +72,9 @@ def get_latest_ver(pkg: str) -> tuple[str, tuple] | None:
     )  # pyright: ignore[reportReturnType]
 
 
-def 
-
+def get_specified_version(ver: str, pkg: str) -> str | None:
+    """Gets a specific version of a specific package. Note that NO CHECKS are being run to make sure that this package fits within your current python version."""
+    downloadables: dict = _request_return_url(pkg)
+    for i in downloadables:
+        if i["url"].find(ver):
+            return i["url"]

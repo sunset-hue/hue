@@ -1,0 +1,1 @@
+"""Contains the dependency resolver."""
