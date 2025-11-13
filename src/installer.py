@@ -1,21 +1,16 @@
-"""Basic package installer"""
+"""File to manage basic installation needs"""
 
 import requests as r
-from _inbuilt_types.pkgs import Package
-import os
 import json
 import sys
-import typing
 
 
-# reworking everything to look cleaner
 
-
-def _request_return_url(pkg: Package):
+def _request_return_url(pkg: str):
     return json.loads(
         r.request(
             "GET",
-            f"https://pypi.org/simple/{pkg.pkg_name}",
+            f"https://pypi.org/simple/{pkg}",
             headers={"Accept": "application/vnd.pypi.simple.v1+json"},
         ).content
     )["files"]
@@ -34,7 +29,7 @@ def _correct_idx_for_version():
         return 3
 
 
-def get_latest_ver(pkg: Package) -> str | None:
+def get_latest_ver(pkg: str) -> tuple[str, tuple] | None:
     """Gets the latest version of this package's download url if no version number was supplied.
     Note that this only returns the latest version that supports the current python version that `hue`'s installed on.
     """
@@ -42,18 +37,21 @@ def get_latest_ver(pkg: Package) -> str | None:
     three_tuple: tuple[int, int, int] = (0, 0, 0)
     success_data: int | None = None
     n = 0
+    formatted_sys_ver = sys.version if len(sys.version) == 6 else sys.version + ".0"
     curr_py_version = sys.version[0 : _correct_idx_for_version()]
     for i in downloadables:
-        if i["requires_python"] == None or int(
-            "".join(curr_py_version.split("."))
-        ) >= int("".join(i["requires_python"].strip("<=>").split("."))):
+        if (
+            i.get("requires_python") == None
+            or int("".join(curr_py_version.split(".")))
+            >= int("".join(i["requires_python"].strip("<=>").split(".")))
+            and i["url"].endswith(".whl")
+        ):
             to_be_turned = (
                 i["filename"]
-                .removesuffix(".tar.gz")
-                .strip("abcdefghijklmnopqrstuvwxyz")
+                .removesuffix(".whl")
+                .strip("abcdefghijklmnopqrstuvwxyz-")
                 .split(".")
             )
-            # first few results here (if package name isn't alpha numeric is the version numbers we need)
             # since all pypi packages follow semver or some version of that, we can just put it into the 3 tuple, no extra formatting needed
             three_tuple = (to_be_turned[0], to_be_turned[1], to_be_turned[2])
             success_data = n
@@ -63,9 +61,12 @@ def get_latest_ver(pkg: Package) -> str | None:
             "Error! Could not find downloadable distribution that matches your current python version. Either you can downgrade a python version or specify a compatible package version using ==, >=, <= syntax."
         )
         return
-    return downloadables[success_data]["url"]
+    print(three_tuple)
+    return (
+        downloadables[success_data]["url"],
+        three_tuple,
+    )  # pyright: ignore[reportReturnType]
 
 
-def install_into_site(pkg: Package):
-    # since we have no outside interface yet, this'll be enough
-    ...
+def install_into_site(pkg: str):
+
