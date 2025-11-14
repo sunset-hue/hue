@@ -3,6 +3,7 @@
 import requests as r
 import json
 import sys
+import os
 
 
 def _request_return_url(pkg: str):
@@ -14,6 +15,13 @@ def _request_return_url(pkg: str):
             headers={"Accept": "application/vnd.pypi.simple.v1+json"},
         ).content
     )["files"]
+
+
+def dist_type(path: str, package: str):
+    if f"{package}-" in os.listdir(path):
+        return "sdist"
+    if f"{package}.dist-info" in os.listdir(path):
+        return "whl"
 
 
 def _correct_idx_for_version():
