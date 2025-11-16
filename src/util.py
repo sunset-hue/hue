@@ -73,7 +73,6 @@ def get_latest_ver(pkg: str) -> tuple[str, tuple] | None:
         print(
             "Error! Could not find downloadable distribution that matches your current python version. Either you can downgrade a python version or specify a compatible package version using ==, >=, <= syntax."
         )
-        return
     print(three_tuple)
     return (
         downloadables[success_data]["url"],
@@ -87,7 +86,3 @@ def get_specified_version(ver: str, pkg: str) -> str | None:
     for i in downloadables:
         if i["url"].find(ver):
             return i["url"]
-
-
-def install(pkg: str, ver: int):
-    """Actually does the installing part of installing the package (e.g runs all the stages and also gets dependencies)"""
