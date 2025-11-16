@@ -4,6 +4,7 @@ import requests as r
 import json
 import sys
 import os
+from ._build import build_pkg
 
 
 def _request_return_url(pkg: str):
@@ -86,3 +87,7 @@ def get_specified_version(ver: str, pkg: str) -> str | None:
     for i in downloadables:
         if i["url"].find(ver):
             return i["url"]
+
+
+def install(pkg: str, ver: int):
+    """Actually does the installing part of installing the package (e.g runs all the stages and also gets dependencies)"""

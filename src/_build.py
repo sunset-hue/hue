@@ -71,5 +71,5 @@ def build_pkg(path: str, dest: str, pkg: str, ver: str):
                 raise ValueError(
                     "build_system is not a recognized build system. Please check your pyproject.toml."
                 )
-            build_pkg(path, dest, pkg, ver)
-            # we can just recurse because ofc, the former sdist has been converted into a wheel and can be unzipped
+        build_pkg(path, dest, pkg, ver)
+        # we can just recurse because ofc, the former sdist has been converted into a wheel and can be unzipped
