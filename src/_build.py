@@ -2,7 +2,10 @@
 
 import tomllib
 import subprocess
-import setuptools.build_meta as build
+import setuptools.build_meta as tools_build
+import flit.buildapi as flit_build
+import hatchling.build as hatch_build
+import poetry.masonry.api as poetry_build
 import os
 
 
@@ -35,3 +38,7 @@ def type_and_system(path: str) -> list[str]:
         toml = tomllib.load(open(f"{path}/pyproject.toml", "rb"))
         tup_return[1] = toml["requires"][0]
         return tup_return
+
+
+def build_pkg(path: str):
+    type_and_sys = type_and_system(path)
